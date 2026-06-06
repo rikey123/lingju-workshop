@@ -8,6 +8,7 @@ import {
 export const SCREENPLAY_BLOCK_TYPES = [...screenplayBlockTypes];
 
 type NewBlockInput = {
+  id?: string;
   type: ScreenplayBlockType;
   text: string;
   speakerId?: string;
@@ -23,7 +24,7 @@ export function insertBlockAfter(scene: Scene, targetBlockId: string, input: New
 
   const target = scene.blocks[targetIndex];
   const inserted: ScriptBlock = {
-    id: `${targetBlockId}_after_${input.type}`,
+    id: input.id ?? `${targetBlockId}_after_${input.type}`,
     version: 1,
     type: input.type,
     text: input.text,
