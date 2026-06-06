@@ -1,0 +1,173 @@
+script:
+  metadata:
+    title: "青山旧梦"
+    version: "1.0"
+    language: "zh-CN"
+    output_format: "screenplay"
+    generated_by: "ScriptMind"
+    schema_version: "1.0"
+
+  source:
+    type: "novel"
+    chapter_count: 3
+    title: "青山旧梦"
+
+  characters:
+    - id: "char_001"
+      name: "林晚"
+      role: "protagonist"
+      description: "回到青山县调查父亲旧事的年轻女性。"
+      traits:
+        - "冷静"
+        - "克制"
+        - "谨慎"
+      goals:
+        - "查清父亲信中提到的真相"
+
+    - id: "char_002"
+      name: "沈亦川"
+      role: "supporting"
+      description: "林晚的旧识，似乎知道旧案相关信息。"
+      traits:
+        - "沉默"
+        - "隐忍"
+      goals:
+        - "隐藏部分旧事"
+
+  acts:
+    - act_id: "act_01"
+      title: "归来与重逢"
+      summary: "林晚回到青山县，并在医院重逢沈亦川。"
+      scenes:
+        - scene_id: "scene_001"
+          title: "雨夜归来"
+          source_chapters: [1]
+          location: "青山县车站外"
+          time: "夜晚"
+          atmosphere: "阴冷、压抑"
+          purpose: "交代林晚回到故乡及内心抗拒。"
+          conflict_level: 4
+          characters: ["char_001"]
+          emotional_curve:
+            start: "克制"
+            end: "沉重"
+          beats:
+            - beat_id: "beat_001"
+              type: "action"
+              content: "雨水打在车站外的路面上，林晚拖着行李箱站在路灯下。"
+              source_trace:
+                chapter_id: 1
+                paragraph_range: [1, 1]
+                adaptation_type: "rewrite"
+            - beat_id: "beat_002"
+              type: "narration"
+              content: "三年前，她发誓再也不回来。现在，一封父亲留下的信把她带回了这里。"
+              source_trace:
+                chapter_id: 1
+                paragraph_range: [2, 2]
+                adaptation_type: "rewrite"
+          camera_suggestion:
+            - shot_type: "wide"
+              target: "车站"
+              description: "雨夜车站全景，林晚独自站在灯下。"
+            - shot_type: "close_up"
+              target: "林晚"
+              description: "林晚看向远处街道，表情克制。"
+
+        - scene_id: "scene_002"
+          title: "医院重逢"
+          source_chapters: [2]
+          location: "县医院走廊"
+          time: "夜晚"
+          atmosphere: "安静、紧张"
+          purpose: "引出林晚与沈亦川的旧关系。"
+          conflict_level: 6
+          characters: ["char_001", "char_002"]
+          emotional_curve:
+            start: "平静"
+            end: "戒备"
+          beats:
+            - beat_id: "beat_003"
+              type: "action"
+              content: "林晚推开急诊室的门，走廊里弥漫着消毒水的味道。"
+            - beat_id: "beat_004"
+              type: "dialogue"
+              speaker: "char_002"
+              emotion: "意外"
+              content: "林晚？"
+            - beat_id: "beat_005"
+              type: "action"
+              content: "林晚停下脚步，抬头看向走廊尽头。"
+            - beat_id: "beat_006"
+              type: "dialogue"
+              speaker: "char_002"
+              emotion: "克制"
+              content: "你怎么回来了？"
+            - beat_id: "beat_007"
+              type: "dialogue"
+              speaker: "char_001"
+              emotion: "疏离"
+              content: "我只是回来处理一些旧事。"
+          source_trace:
+            chapter_id: 2
+            paragraph_range: [1, 6]
+            adaptation_type: "rewrite"
+          camera_suggestion:
+            - shot_type: "over_shoulder"
+              target: "林晚"
+              description: "从林晚肩后看向走廊尽头的沈亦川。"
+            - shot_type: "close_up"
+              target: "信封"
+              description: "林晚握紧手里的信封。"
+
+    - act_id: "act_02"
+      title: "旧案线索"
+      summary: "林晚在老宅中发现父亲留下的线索。"
+      scenes:
+        - scene_id: "scene_003"
+          title: "老宅脚步声"
+          source_chapters: [3]
+          location: "林家老宅书房"
+          time: "深夜"
+          atmosphere: "悬疑、危险"
+          purpose: "抛出旧案疑点，并制造悬念。"
+          conflict_level: 8
+          characters: ["char_001"]
+          emotional_curve:
+            start: "疑惑"
+            end: "紧张"
+          beats:
+            - beat_id: "beat_008"
+              type: "action"
+              content: "林晚拉开书房抽屉，在最里面发现一张泛黄的照片。"
+            - beat_id: "beat_009"
+              type: "action"
+              content: "她翻过照片，看见背面写着一行字。"
+            - beat_id: "beat_010"
+              type: "narration"
+              content: "不要相信当年的结论。"
+            - beat_id: "beat_011"
+              type: "transition"
+              content: "窗外传来脚步声。"
+            - beat_id: "beat_012"
+              type: "action"
+              content: "林晚迅速关掉台灯，屏住呼吸，看向门口。"
+          source_trace:
+            chapter_id: 3
+            paragraph_range: [1, 5]
+            adaptation_type: "rewrite"
+          camera_suggestion:
+            - shot_type: "close_up"
+              target: "照片背面"
+              description: "镜头聚焦照片背面的字迹。"
+            - shot_type: "medium"
+              target: "林晚"
+              description: "林晚关灯后躲在书桌旁，紧张看向门口。"
+
+  quality:
+    overall_score: 88
+    plot_coherence: 91
+    character_consistency: 86
+    dialogue_naturalness: 89
+    scene_structure: 84
+    yaml_validity: 93

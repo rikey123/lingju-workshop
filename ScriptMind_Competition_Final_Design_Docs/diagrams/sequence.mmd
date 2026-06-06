@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant LLM
+    participant Validator
+
+    User->>Frontend: 上传小说
+    Frontend->>Backend: 提交小说文本
+    Backend->>LLM: 请求结构化解析
+    LLM-->>Backend: 返回人物/事件/场景
+    Backend->>LLM: 请求剧本生成
+    LLM-->>Backend: 返回 YAML
+    Backend->>Validator: 校验 YAML Schema
+    Validator-->>Backend: 返回校验结果
+    Backend-->>Frontend: 返回剧本与质量报告

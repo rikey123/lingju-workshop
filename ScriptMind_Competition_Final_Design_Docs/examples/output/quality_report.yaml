@@ -1,0 +1,30 @@
+quality_report:
+  script_id: "script_demo_001"
+  overall_score: 88
+  dimensions:
+    plot_coherence:
+      score: 91
+      comment: "剧情从归来到重逢再到旧案线索，因果链较清晰。"
+    character_consistency:
+      score: 86
+      comment: "林晚的克制和戒备保持一致，沈亦川的隐瞒感可以进一步加强。"
+    dialogue_naturalness:
+      score: 89
+      comment: "对白简洁，但第二场可增加潜台词。"
+    scene_structure:
+      score: 84
+      comment: "第三场悬念较强，但与下一场之间需要过渡。"
+    yaml_validity:
+      score: 93
+      comment: "字段完整，建议补充更多 source_trace。"
+  issues:
+    - scene_id: "scene_002"
+      type: "dialogue"
+      severity: "low"
+      description: "沈亦川的对白略直接。"
+      suggestion: "可增加一句含蓄试探，使人物关系更有张力。"
+    - scene_id: "scene_003"
+      type: "transition"
+      severity: "medium"
+      description: "脚步声出现较突然。"
+      suggestion: "可在前一 beat 增加风吹窗户或旧宅声响作为铺垫。"
