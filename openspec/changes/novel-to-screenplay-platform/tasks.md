@@ -1,8 +1,8 @@
 ## 1. Shared foundations
 
 - [ ] 1.1 Freeze the canonical screenplay document schema, API envelope, version token rules, and shared job state model
-- [ ] 1.2 Create shared fixtures for projects, drafts, scenes, blocks, jobs, exports, and validation errors
-- [ ] 1.3 Define contract tests that compare frontend expectations against backend response shapes
+- [x] 1.2 Create shared fixtures for projects, drafts, scenes, blocks, jobs, exports, and validation errors
+- [x] 1.3 Define contract tests that compare frontend expectations against backend response shapes
 
 ## 2. Backend foundation
 
@@ -22,11 +22,11 @@
 
 ## 4. Editor and workspace frontend
 
-- [ ] 4.1 Scaffold Next.js workspace shell, route structure, and HeroUI layout system
-- [ ] 4.2 Implement TipTap screenplay schema and typed block editing behavior
-- [ ] 4.3 Implement outline view, character view, story graph view, quality view, export view, and history view
-- [ ] 4.4 Implement Zustand workspace state, TanStack Query data fetching, and autosave flows
-- [ ] 4.5 Implement command palette, drag-and-drop scene ordering, and inline validation markers
+- [x] 4.1 Scaffold Next.js workspace shell, route structure, and HeroUI layout system
+- [x] 4.2 Implement TipTap screenplay schema and typed block editing behavior
+- [x] 4.3 Implement outline view, character view, story graph view, quality view, export view, and history view
+- [x] 4.4 Implement Zustand workspace state, TanStack Query data fetching, and autosave flows
+- [x] 4.5 Implement command palette, drag-and-drop scene ordering, and inline validation markers
 
 ## 5. Export, validation, and interoperability
 
@@ -38,7 +38,7 @@
 
 ## 6. Two-person integration and verification
 
-- [ ] 6.1 Wire frontend pages to backend APIs with the published contract fixtures
+- [x] 6.1 Wire frontend pages to backend APIs with the published contract fixtures
 - [ ] 6.2 Add end-to-end tests for import, generation, editing, revision history, and export
 - [ ] 6.3 Add contract tests for list endpoints, mutation conflicts, job polling, and validation errors
 - [ ] 6.4 Validate the full happy path from 3+ chapter import to editable screenplay to downloadable exports
