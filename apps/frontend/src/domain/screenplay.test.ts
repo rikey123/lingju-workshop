@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   SCREENPLAY_BLOCK_TYPES,
   convertBlock,
+  createUniqueBlockId,
   insertBlockAfter,
+  mergeBlockWithNext,
   splitBlockAt
 } from "./screenplay";
 import { sampleDraft } from "./sample-data";
@@ -71,5 +73,36 @@ describe("screenplay contract", () => {
       type: "beat",
       text: note.text
     });
+  });
+
+  it("creates unique local block IDs for repeated inserts", () => {
+    const firstScene = sampleDraft.scenes[0];
+    const firstId = createUniqueBlockId(sampleDraft.scenes, "block_001", "cmd_action");
+    const updated = insertBlockAfter(firstScene, "block_001", {
+      id: firstId,
+      type: "action",
+      text: "新增动作"
+    });
+    const secondId = createUniqueBlockId(
+      [{ ...firstScene, blocks: updated.blocks }, ...sampleDraft.scenes.slice(1)],
+      "block_001",
+      "cmd_action"
+    );
+
+    expect(firstId).toBe("block_001_cmd_action_1");
+    expect(secondId).toBe("block_001_cmd_action_2");
+  });
+
+  it("merges a block with the next block while preserving source trace metadata", () => {
+    const firstScene = sampleDraft.scenes[0];
+    const merged = mergeBlockWithNext(firstScene, "block_002");
+
+    expect(merged.blocks.some((block) => block.id === "block_002")).toBe(false);
+    expect(merged.blocks.some((block) => block.id === "block_003")).toBe(false);
+    expect(merged.blocks.find((block) => block.id === "block_002_merged")).toMatchObject({
+      type: "action",
+      provenance: "user"
+    });
+    expect(merged.blocks.find((block) => block.id === "block_002_merged")?.sourceRefs).toHaveLength(2);
   });
 });

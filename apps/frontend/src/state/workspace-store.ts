@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import type { Scene } from "@/domain/contracts";
 import { sampleWorkspace } from "@/domain/sample-data";
+import { createUniqueBlockId, reorderScenes } from "@/domain/screenplay";
 
 export type WorkspaceView =
   | "editor"
@@ -30,6 +31,8 @@ type WorkspaceStore = {
   markConflict: (serverVersion: number) => void;
   setDraftVersion: (version: number) => void;
   replaceScenes: (scenes: Scene[]) => void;
+  moveScene: (activeId: string, overId: string) => void;
+  nextBlockId: (baseBlockId: string, suffix: string) => string;
   reset: () => void;
   scenes: Scene[];
 };
@@ -61,7 +64,7 @@ const initialState = {
   scenes: cloneScenes(sampleWorkspace.draft.scenes)
 };
 
-export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
+export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   ...initialState,
   setActiveView: (view) => set({ activeView: view }),
   setActiveScene: (sceneId) => set({ activeSceneId: sceneId }),
@@ -78,6 +81,13 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
     set({ autosaveState: "conflict", conflictVersion: serverVersion }),
   setDraftVersion: (version) => set({ draftVersion: version }),
   replaceScenes: (scenes) => set({ scenes }),
+  moveScene: (activeId, overId) =>
+    set((state) => ({
+      scenes: reorderScenes(state.scenes, activeId, overId),
+      autosaveState: activeId === overId ? state.autosaveState : "dirty"
+    })),
+  nextBlockId: (baseBlockId, suffix) =>
+    createUniqueBlockId(get().scenes, baseBlockId, suffix),
   reset: () =>
     set({
       ...initialState,

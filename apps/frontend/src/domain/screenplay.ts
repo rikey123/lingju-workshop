@@ -75,6 +75,48 @@ export function splitBlockAt(scene: Scene, blockId: string, offset: number): Sce
   };
 }
 
+export function mergeBlockWithNext(scene: Scene, blockId: string): Scene {
+  const blockIndex = scene.blocks.findIndex((block) => block.id === blockId);
+  const current = scene.blocks[blockIndex];
+  const next = scene.blocks[blockIndex + 1];
+
+  if (blockIndex < 0 || !current || !next) {
+    return scene;
+  }
+
+  const mergedSourceRefs = [...current.sourceRefs, ...next.sourceRefs].filter(
+    (sourceRef, index, sourceRefs) =>
+      sourceRefs.findIndex(
+        (item) =>
+          item.chapterId === sourceRef.chapterId &&
+          item.paragraphRange[0] === sourceRef.paragraphRange[0] &&
+          item.paragraphRange[1] === sourceRef.paragraphRange[1] &&
+          item.adaptationType === sourceRef.adaptationType
+      ) === index
+  );
+
+  const merged: ScriptBlock = {
+    ...current,
+    id: `${current.id}_merged`,
+    version: Math.max(current.version, next.version) + 1,
+    text: [current.text, next.text].filter(Boolean).join("\n"),
+    sourceRefs: mergedSourceRefs,
+    provenance: "user",
+    validationIssueIds: Array.from(
+      new Set([...current.validationIssueIds, ...next.validationIssueIds])
+    )
+  };
+
+  return {
+    ...scene,
+    blocks: [
+      ...scene.blocks.slice(0, blockIndex),
+      merged,
+      ...scene.blocks.slice(blockIndex + 2)
+    ]
+  };
+}
+
 export function convertBlock(scene: Scene, blockId: string, type: ScreenplayBlockType): Scene {
   return {
     ...scene,
@@ -87,6 +129,23 @@ export function convertBlock(scene: Scene, blockId: string, type: ScreenplayBloc
         : block
     )
   };
+}
+
+export function createUniqueBlockId(
+  scenes: Scene[],
+  baseBlockId: string,
+  suffix: string
+): string {
+  const existingIds = new Set(scenes.flatMap((scene) => scene.blocks.map((block) => block.id)));
+  let nextIndex = 1;
+  let candidate = `${baseBlockId}_${suffix}_${nextIndex}`;
+
+  while (existingIds.has(candidate)) {
+    nextIndex += 1;
+    candidate = `${baseBlockId}_${suffix}_${nextIndex}`;
+  }
+
+  return candidate;
 }
 
 export function updateBlockText(scene: Scene, blockId: string, text: string): Scene {

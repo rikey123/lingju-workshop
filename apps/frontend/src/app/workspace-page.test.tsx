@@ -111,7 +111,64 @@ describe("WorkspacePage", () => {
     await waitFor(() =>
       expect(screen.queryByRole("textbox", { name: /command/i })).not.toBeInTheDocument()
     );
-    expect(screen.getByLabelText("action block_001_cmd_action")).toBeInTheDocument();
+    expect(screen.getByLabelText("action block_001_cmd_action_1")).toBeInTheDocument();
     expect(screen.getByText("dirty")).toBeInTheDocument();
+  });
+
+  it("command palette creates unique block IDs on repeated insertions", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<WorkspacePage />);
+
+    await user.click(screen.getByRole("button", { name: "cmdk" }));
+    await user.click(screen.getByText("Insert action block"));
+    await user.click(screen.getByRole("button", { name: "cmdk" }));
+    await user.click(screen.getByText("Insert action block"));
+
+    const blockIds = useWorkspaceStore
+      .getState()
+      .scenes.flatMap((scene) => scene.blocks)
+      .map((block) => block.id);
+
+    expect(new Set(blockIds).size).toBe(blockIds.length);
+    expect(blockIds).toEqual(expect.arrayContaining(["block_001_cmd_action_1", "block_001_cmd_action_2"]));
+  });
+
+  it("toolbar split and merge actions mutate the active block and mark the draft dirty", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<WorkspacePage />);
+
+    await user.click(screen.getByLabelText("action block_002"));
+    await user.click(screen.getByRole("button", { name: "Split" }));
+
+    expect(useWorkspaceStore.getState().autosaveState).toBe("dirty");
+    expect(screen.getByLabelText("action block_002_part_1")).toBeInTheDocument();
+    expect(screen.getByLabelText("action block_002_part_2")).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText("action block_002_part_1"));
+    await user.click(screen.getByRole("button", { name: "Merge" }));
+
+    const sceneBlocks = useWorkspaceStore.getState().scenes[0].blocks;
+    expect(sceneBlocks.some((block) => block.id === "block_002_part_1_merged")).toBe(true);
+    expect(sceneBlocks.some((block) => block.id === "block_002_part_2")).toBe(false);
+  });
+
+  it("filters entities and navigates from character/location cards back to source context", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<WorkspacePage />);
+
+    await user.click(screen.getByRole("tab", { name: "人物" }));
+    await user.type(screen.getByRole("searchbox", { name: "Search entities" }), "医院");
+
+    expect(screen.getByText("县医院走廊")).toBeInTheDocument();
+    expect(screen.queryByText("青山县车站外")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Open location 县医院走廊" }));
+
+    expect(useWorkspaceStore.getState()).toMatchObject({
+      activeView: "editor",
+      activeSceneId: "scene_002",
+      activeBlockId: "block_004"
+    });
+    expect(screen.getByText("内景 县医院走廊 夜晚")).toBeInTheDocument();
   });
 });

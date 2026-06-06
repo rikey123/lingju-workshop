@@ -51,7 +51,12 @@ import {
 } from "@/domain/contracts";
 import { sampleWorkspace } from "@/domain/sample-data";
 import { countBlocksByType, filterScenes } from "@/domain/workspace";
-import { insertBlockAfter, reorderScenes, splitBlockAt } from "@/domain/screenplay";
+import {
+  insertBlockAfter,
+  mergeBlockWithNext,
+  reorderScenes,
+  splitBlockAt
+} from "@/domain/screenplay";
 import { useWorkspaceStore, type WorkspaceView } from "@/state/workspace-store";
 import {
   createScreenplayBlockDocument,
@@ -299,6 +304,26 @@ function EditorPanel({
   activeScene: Scene;
 }) {
   const store = useWorkspaceStore();
+  const applyToActiveScene = (updater: (scene: Scene) => Scene) => {
+    store.replaceScenes(
+      store.scenes.map((scene) =>
+        scene.id === store.activeSceneId ? updater(scene) : scene
+      )
+    );
+    store.markDirty();
+  };
+  const splitActiveBlock = () => {
+    const activeBlock = store.scenes
+      .find((scene) => scene.id === store.activeSceneId)
+      ?.blocks.find((block) => block.id === store.activeBlockId);
+
+    applyToActiveScene((scene) =>
+      splitBlockAt(scene, store.activeBlockId, Math.ceil((activeBlock?.text.length ?? 0) / 2))
+    );
+  };
+  const mergeActiveBlock = () => {
+    applyToActiveScene((scene) => mergeBlockWithNext(scene, store.activeBlockId));
+  };
 
   return (
     <section className="script-page">
@@ -308,8 +333,12 @@ function EditorPanel({
           <h2 className="m-0 text-2xl">中文分场剧本</h2>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary">Split</Button>
-          <Button variant="secondary">Merge</Button>
+          <Button variant="secondary" onPress={splitActiveBlock}>
+            Split
+          </Button>
+          <Button variant="secondary" onPress={mergeActiveBlock}>
+            Merge
+          </Button>
           <Button
             variant="primary"
             className="border border-[color:var(--accent)] bg-white px-3 py-2"
@@ -512,7 +541,7 @@ function OutlineView({ scenes }: { scenes: Scene[] }) {
       return;
     }
 
-    store.replaceScenes(reorderScenes(store.scenes, String(active.id), String(over.id)));
+    store.moveScene(String(active.id), String(over.id));
   };
 
   return (
@@ -607,24 +636,103 @@ function SortableSceneCard({ scene }: { scene: Scene }) {
 }
 
 function CharactersView({ workspace }: { workspace: Workspace }) {
+  const store = useWorkspaceStore();
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const openScene = (sceneId: string, blockId?: string) => {
+    const targetScene = store.scenes.find((scene) => scene.id === sceneId);
+
+    if (!targetScene) {
+      return;
+    }
+
+    store.setActiveScene(sceneId);
+    store.setActiveBlock(blockId ?? targetScene.blocks[0]?.id ?? store.activeBlockId);
+    store.setActiveView("editor");
+  };
+  const characters = workspace.characters.filter((character) =>
+    normalizedQuery
+      ? [character.name, character.description, character.traits.join(" "), character.appearances.join(" ")]
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(normalizedQuery)
+      : true
+  );
+  const locations = workspace.locations.filter((location) =>
+    normalizedQuery
+      ? [location.name, location.description, location.sceneIds.join(" ")]
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(normalizedQuery)
+      : true
+  );
+  const threads = workspace.storyThreads.filter((thread) =>
+    normalizedQuery
+      ? [thread.title, thread.status, thread.sceneIds.join(" ")]
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(normalizedQuery)
+      : true
+  );
+
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {workspace.characters.map((character) => (
+    <div>
+      <label className="mb-4 flex items-center gap-2 border border-[color:var(--line)] bg-white px-2">
+        <Search size={16} />
+        <input
+          aria-label="Search entities"
+          className="w-full border-0 py-2 outline-none"
+          role="searchbox"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </label>
+      <div className="grid gap-4 md:grid-cols-2">
+      {characters.map((character) => (
         <article key={character.id} className="scene-card">
           <h3>{character.name}</h3>
           <p>{character.description}</p>
           <p className="text-sm text-[color:var(--muted)]">{character.traits.join(" / ")}</p>
           <strong>出场</strong>
           <p>{character.appearances.join(", ")}</p>
+          <Button
+            variant="secondary"
+            onPress={() => openScene(character.appearances[0])}
+            aria-label={`Open character ${character.name}`}
+          >
+            跳转出场
+          </Button>
         </article>
       ))}
-      {workspace.locations.map((location) => (
+      {locations.map((location) => (
         <article key={location.id} className="scene-card">
           <h3>{location.name}</h3>
           <p>{location.description}</p>
           <p>{location.sceneIds.join(", ")}</p>
+          <Button
+            variant="secondary"
+            onPress={() => openScene(location.sceneIds[0])}
+            aria-label={`Open location ${location.name}`}
+          >
+            跳转地点
+          </Button>
         </article>
       ))}
+      {threads.map((thread) => (
+        <article key={thread.id} className="scene-card">
+          <h3>{thread.title}</h3>
+          <p>{thread.status}</p>
+          <p>{thread.sceneIds.join(", ")}</p>
+          <Button
+            variant="secondary"
+            onPress={() => openScene(thread.sceneIds[0])}
+            aria-label={`Open thread ${thread.title}`}
+          >
+            跳转故事线
+          </Button>
+        </article>
+      ))}
+      </div>
     </div>
   );
 }
@@ -779,7 +887,7 @@ function CommandPalette({ workspace }: { workspace: Workspace }) {
                 runCommand(() => {
                   applyToActiveScene((scene) =>
                     insertBlockAfter(scene, store.activeBlockId, {
-                      id: `${store.activeBlockId}_cmd_action`,
+                      id: store.nextBlockId(store.activeBlockId, "cmd_action"),
                       type: "action",
                       text: "新增动作：承接当前场景节奏。"
                     })

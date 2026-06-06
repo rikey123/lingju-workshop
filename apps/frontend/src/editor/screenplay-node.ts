@@ -66,8 +66,8 @@ export function readScreenplayBlockFromDocument(
         sourceRefs?: SourceReference[];
       }
     | undefined;
-  const documentText = readText(document.content);
   const nodeText = readText(node?.content);
+  const documentText = readText(document.content);
 
   return {
     ...fallback,
@@ -76,6 +76,8 @@ export function readScreenplayBlockFromDocument(
       attrs?.blockType && screenplayBlockTypes.includes(attrs.blockType)
         ? attrs.blockType
         : fallback.type,
+    // Each TipTap instance edits one screenplay block; jsdom can normalize typed
+    // text outside the custom node, so the whole document is the safest source.
     text: documentText || nodeText,
     sourceRefs: attrs?.sourceRefs ?? fallback.sourceRefs
   };
